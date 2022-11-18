@@ -5,12 +5,14 @@ interface Props {
   reservation: Reservation | undefined;
   closeForm: () => void;
   createOrEdit: (reservation: Reservation) => void;
+  submitting: boolean;
 }
 
 const ReservationForm = ({
   reservation: selectedReservation,
   closeForm,
   createOrEdit,
+  submitting,
 }: Props) => {
   const initialState = selectedReservation ?? {
     id: "",
@@ -78,6 +80,9 @@ const ReservationForm = ({
         <input
           type="date"
           placeholder="Date"
+          value={reservation.bookingTime}
+          name="bookingTime"
+          onChange={handleInputChange}
           className="input input-bordered input-primary w-full max-w-xs"
         />
         <div className="py-1" />
@@ -127,7 +132,12 @@ const ReservationForm = ({
         </label>
         <div className="py-3" />
         <div className="card-actions justify-center">
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className={
+              submitting ? "btn btn-primary loading" : "btn btn-primary"
+            }
+          >
             Submit
           </button>
           <button onClick={closeForm} type="button" className="btn btn-ghost">

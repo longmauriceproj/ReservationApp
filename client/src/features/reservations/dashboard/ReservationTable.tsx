@@ -1,17 +1,29 @@
-import React from "react";
+import React, { SyntheticEvent, useState } from "react";
 import { Reservation } from "../../../app/models/reservation";
 
 interface Props {
   reservations: Reservation[];
   selectReservation: (id: string) => void;
   deleteReservation: (id: string) => void;
+  submitting: boolean;
 }
 
 const ReservationTable = ({
   reservations,
   selectReservation,
   deleteReservation,
+  submitting,
 }: Props) => {
+  const [target, setTarget] = useState("");
+
+  const handleReservationDelete = (
+    event: SyntheticEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    setTarget(event.currentTarget.name);
+    deleteReservation(id);
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="table table-compact w-full">
@@ -34,8 +46,13 @@ const ReservationTable = ({
               <td>{reservation.partySize}</td>
               <th>
                 <button
-                  onClick={() => deleteReservation(reservation.id)}
-                  className="btn btn-error btn-xs"
+                  name={reservation.id}
+                  onClick={(e) => handleReservationDelete(e, reservation.id)}
+                  className={
+                    submitting && target === reservation.id
+                      ? "btn btn-error btn-xs loading"
+                      : "btn btn-error btn-xs"
+                  }
                 >
                   delete
                 </button>

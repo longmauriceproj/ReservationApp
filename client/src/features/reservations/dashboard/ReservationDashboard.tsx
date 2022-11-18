@@ -14,6 +14,7 @@ interface Props {
   closeForm: () => void;
   createOrEditReservation: (reservation: Reservation) => void;
   deleteReservation: (id: string) => void;
+  submitting: boolean;
 }
 
 const ReservationDashboard = ({
@@ -26,6 +27,7 @@ const ReservationDashboard = ({
   closeForm,
   createOrEditReservation,
   deleteReservation,
+  submitting,
 }: Props) => {
   return (
     <div className="p-4">
@@ -33,6 +35,7 @@ const ReservationDashboard = ({
         reservations={reservations}
         selectReservation={selectReservation}
         deleteReservation={deleteReservation}
+        submitting={submitting}
       />
       <div className="divider" />
       {selectedReservation && !editMode && (
@@ -47,6 +50,7 @@ const ReservationDashboard = ({
           closeForm={closeForm}
           reservation={selectedReservation}
           createOrEdit={createOrEditReservation}
+          submitting={submitting}
         />
       )}
     </div>

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Reservation } from "../models/reservation";
 import NavBar from "./NavBar";
 import ReservationDashboard from "../../features/reservations/dashboard/ReservationDashboard";
 import { v4 as uuid } from "uuid";
+import agent from "../api/agent";
+import LoadingComponent from "./LoadingComponent";
 
 function App() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -11,13 +12,19 @@ function App() {
     Reservation | undefined
   >(undefined);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    axios
-      .get<Reservation[]>("https://localhost:5001/api/reservations")
-      .then((response) => {
-        setReservations(response.data);
+    agent.Reservations.record().then((response) => {
+      let reservations: Reservation[] = [];
+      response.forEach((reservation) => {
+        reservation.bookingTime = reservation.bookingTime.split("T")[0];
+        reservations.push(reservation);
       });
+      setReservations(response);
+      setLoading(false);
+    });
   }, []);
 
   const handleSelectReservation = (id: string) => {
@@ -38,19 +45,37 @@ function App() {
   };
 
   const handleCreateOrEditReservation = (reservation: Reservation) => {
-    reservation.id
-      ? setReservations([
+    setSubmitting(true);
+    if (reservation.id) {
+      agent.Reservations.update(reservation).then(() => {
+        setReservations([
           ...reservations.filter((res) => res.id !== reservation.id),
           reservation,
-        ])
-      : setReservations([...reservations, { ...reservation, id: uuid() }]);
-    setEditMode(false);
-    setSelectedReservation(reservation);
+        ]);
+        setSelectedReservation(reservation);
+        setEditMode(false);
+        setSubmitting(false);
+      });
+    } else {
+      reservation.id = uuid();
+      agent.Reservations.create(reservation).then(() => {
+        setReservations([...reservations, reservation]);
+        setSelectedReservation(reservation);
+        setEditMode(false);
+        setSubmitting(false);
+      });
+    }
   };
 
   const handleDeleteReservation = (id: string) => {
-    setReservations([...reservations.filter((res) => res.id !== id)]);
+    setSubmitting(true);
+    agent.Reservations.delete(id).then(() => {
+      setReservations([...reservations.filter((res) => res.id !== id)]);
+      setSubmitting(false);
+    });
   };
+
+  if (loading) return <LoadingComponent content="Loading reservations..." />;
 
   return (
     <div className="App">
@@ -65,6 +90,7 @@ function App() {
         closeForm={handleFormClose}
         createOrEditReservation={handleCreateOrEditReservation}
         deleteReservation={handleDeleteReservation}
+        submitting={submitting}
       />
     </div>
   );
