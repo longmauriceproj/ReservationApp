@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    public class ReservationsDashboardController : BaseApiController
+    public class ReservationsController : BaseApiController
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public ReservationsDashboardController(DataContext context, IMapper mapper)
+        public ReservationsController(DataContext context, IMapper mapper)
         {
             _mapper = mapper;
             _context = context;
