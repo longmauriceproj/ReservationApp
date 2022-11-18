@@ -19,7 +19,7 @@ function App() {
     <div className="App">
       <ul>
         {reservations.map((reservation: any) => (
-          <li key={reservation.id}>{reservation.customerFullName}</li>
+          <li key={reservation.id}>{reservation.email}</li>
         ))}
       </ul>
     </div>
