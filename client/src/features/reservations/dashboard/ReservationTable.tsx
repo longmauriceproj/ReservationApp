@@ -1,19 +1,11 @@
+import { observer } from "mobx-react-lite";
 import React, { SyntheticEvent, useState } from "react";
-import { Reservation } from "../../../app/models/reservation";
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  reservations: Reservation[];
-  selectReservation: (id: string) => void;
-  deleteReservation: (id: string) => void;
-  submitting: boolean;
-}
-
-const ReservationTable = ({
-  reservations,
-  selectReservation,
-  deleteReservation,
-  submitting,
-}: Props) => {
+const ReservationTable = () => {
+  const { reservationStore } = useStore();
+  const { reservationsByDateAndTime, deleteReservation, loading } =
+    reservationStore;
   const [target, setTarget] = useState("");
 
   const handleReservationDelete = (
@@ -38,7 +30,7 @@ const ReservationTable = ({
           </tr>
         </thead>
         <tbody>
-          {reservations.map((reservation) => (
+          {reservationsByDateAndTime.map((reservation) => (
             <tr key={reservation.id}>
               <th>{reservation.id}</th>
               <td>{reservation.customerFullName}</td>
@@ -49,7 +41,7 @@ const ReservationTable = ({
                   name={reservation.id}
                   onClick={(e) => handleReservationDelete(e, reservation.id)}
                   className={
-                    submitting && target === reservation.id
+                    loading && target === reservation.id
                       ? "btn btn-error btn-xs loading"
                       : "btn btn-error btn-xs"
                   }
@@ -59,7 +51,9 @@ const ReservationTable = ({
               </th>
               <th>
                 <button
-                  onClick={() => selectReservation(reservation.id)}
+                  onClick={() =>
+                    reservationStore.selectReservation(reservation.id)
+                  }
                   className="btn btn-ghost btn-xs"
                 >
                   details
@@ -73,4 +67,4 @@ const ReservationTable = ({
   );
 };
 
-export default ReservationTable;
+export default observer(ReservationTable);

@@ -1,60 +1,22 @@
+import { observer } from "mobx-react-lite";
 import React from "react";
-import { Reservation } from "../../../app/models/reservation";
+import { useStore } from "../../../app/stores/store";
 import ReservationDetails from "../details/ReservationDetails";
 import ReservationForm from "../form/ReservationForm";
 import ReservationTable from "./ReservationTable";
 
-interface Props {
-  reservations: Reservation[];
-  selectedReservation: Reservation | undefined;
-  selectReservation: (id: string) => void;
-  cancelSelectReservation: () => void;
-  editMode: boolean;
-  openForm: (id: string) => void;
-  closeForm: () => void;
-  createOrEditReservation: (reservation: Reservation) => void;
-  deleteReservation: (id: string) => void;
-  submitting: boolean;
-}
+const ReservationDashboard = () => {
+  const { reservationStore } = useStore();
+  const { selectedReservation, editMode } = reservationStore;
 
-const ReservationDashboard = ({
-  reservations,
-  selectedReservation,
-  selectReservation,
-  cancelSelectReservation,
-  editMode,
-  openForm,
-  closeForm,
-  createOrEditReservation,
-  deleteReservation,
-  submitting,
-}: Props) => {
   return (
     <div className="p-4">
-      <ReservationTable
-        reservations={reservations}
-        selectReservation={selectReservation}
-        deleteReservation={deleteReservation}
-        submitting={submitting}
-      />
+      <ReservationTable />
       <div className="divider" />
-      {selectedReservation && !editMode && (
-        <ReservationDetails
-          reservation={selectedReservation}
-          cancelSelectReservation={cancelSelectReservation}
-          openForm={openForm}
-        />
-      )}
-      {editMode && (
-        <ReservationForm
-          closeForm={closeForm}
-          reservation={selectedReservation}
-          createOrEdit={createOrEditReservation}
-          submitting={submitting}
-        />
-      )}
+      {selectedReservation && !editMode && <ReservationDetails />}
+      {editMode && <ReservationForm />}
     </div>
   );
 };
 
-export default ReservationDashboard;
+export default observer(ReservationDashboard);

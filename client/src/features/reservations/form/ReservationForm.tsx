@@ -1,19 +1,16 @@
+import { observer } from "mobx-react-lite";
 import React, { ChangeEvent, useState } from "react";
-import { Reservation } from "../../../app/models/reservation";
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  reservation: Reservation | undefined;
-  closeForm: () => void;
-  createOrEdit: (reservation: Reservation) => void;
-  submitting: boolean;
-}
-
-const ReservationForm = ({
-  reservation: selectedReservation,
-  closeForm,
-  createOrEdit,
-  submitting,
-}: Props) => {
+const ReservationForm = () => {
+  const { reservationStore } = useStore();
+  const {
+    selectedReservation,
+    closeForm,
+    createReservation,
+    updateReservation,
+    loading,
+  } = reservationStore;
   const initialState = selectedReservation ?? {
     id: "",
     bookingTime: "",
@@ -30,7 +27,9 @@ const ReservationForm = ({
 
   const handleSubmit = (event: ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createOrEdit(reservation);
+    reservation.id
+      ? updateReservation(reservation)
+      : createReservation(reservation);
   };
 
   const handleInputChange = (
@@ -134,9 +133,7 @@ const ReservationForm = ({
         <div className="card-actions justify-center">
           <button
             type="submit"
-            className={
-              submitting ? "btn btn-primary loading" : "btn btn-primary"
-            }
+            className={loading ? "btn btn-primary loading" : "btn btn-primary"}
           >
             Submit
           </button>
@@ -149,4 +146,4 @@ const ReservationForm = ({
   );
 };
 
-export default ReservationForm;
+export default observer(ReservationForm);

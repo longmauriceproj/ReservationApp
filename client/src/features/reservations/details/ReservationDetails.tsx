@@ -1,17 +1,18 @@
 import React from "react";
-import { Reservation } from "../../../app/models/reservation";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { useStore } from "../../../app/stores/store";
 
-interface Props {
-  reservation: Reservation;
-  cancelSelectReservation: () => void;
-  openForm: (id: string) => void;
-}
+const ReservationDetails = () => {
+  const { reservationStore } = useStore();
+  const {
+    selectedReservation: reservation,
+    openForm,
+    cancelSelectReservation,
+  } = reservationStore;
 
-const ReservationDetails = ({
-  reservation,
-  cancelSelectReservation,
-  openForm,
-}: Props) => {
+  // guard clause necessary to remove typescript errors even though guard clause in dashboard checks if reservation is undefined
+  if (!reservation) return <LoadingComponent />;
+
   return (
     <div className="card w-96 bg-neutral text-neutral-content">
       <div className="card-body">
