@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { SyntheticEvent, useState } from "react";
+import { convertTimeFormat } from "../../../app/helpers/dateTime";
 import { useStore } from "../../../app/stores/store";
 
 const ReservationTable = () => {
@@ -23,7 +24,8 @@ const ReservationTable = () => {
           <tr>
             <th>Confirmation #</th>
             <th>Name</th>
-            <th>Date and Time</th>
+            <th>Date</th>
+            <th>Time</th>
             <th>Party Size</th>
             <th></th>
             <th></th>
@@ -34,7 +36,10 @@ const ReservationTable = () => {
             <tr key={reservation.id}>
               <th>{reservation.id}</th>
               <td>{reservation.customerFullName}</td>
-              <td>{reservation.bookingTime}</td>
+              <td>{reservation.bookingTime.split("T")[0]}</td>
+              <td>
+                {convertTimeFormat(reservation.bookingTime.split("T")[1])}
+              </td>
               <td>{reservation.partySize}</td>
               <th>
                 <button

@@ -1,4 +1,5 @@
 import React from "react";
+import { convertTimeFormat } from "../../../app/helpers/dateTime";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useStore } from "../../../app/stores/store";
 
@@ -22,9 +23,15 @@ const ReservationDetails = () => {
         </label>
         <strong>{reservation.id}</strong>
         <label className="label">
-          <span className="label-text">Date and Time</span>
+          <span className="label-text">Date</span>
         </label>
-        <strong>{reservation.bookingTime}</strong>
+        <strong>{reservation.bookingTime.split("T")[0]}</strong>
+        <label className="label">
+          <span className="label-text">Time</span>
+        </label>
+        <strong>
+          {convertTimeFormat(reservation.bookingTime.split("T")[1])}
+        </strong>
         <label className="label">
           <span className="label-text">Party Size</span>
         </label>

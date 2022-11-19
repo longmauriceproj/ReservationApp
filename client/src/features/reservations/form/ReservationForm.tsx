@@ -2,6 +2,8 @@ import { observer } from "mobx-react-lite";
 import React, { ChangeEvent, useState } from "react";
 import { useStore } from "../../../app/stores/store";
 
+// TODO: The form is still missing a lot of validation, but all basic CRUD operations works. 11/19/2022
+
 const ReservationForm = () => {
   const { reservationStore } = useStore();
   const {
@@ -30,6 +32,7 @@ const ReservationForm = () => {
     reservation.id
       ? updateReservation(reservation)
       : createReservation(reservation);
+    console.log(reservation);
   };
 
   const handleInputChange = (
@@ -37,6 +40,20 @@ const ReservationForm = () => {
   ) => {
     const { name, value } = event.target;
     setReservation({ ...reservation, [name]: value });
+  };
+
+  const handleDateTimeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    let [date, time] = reservation.bookingTime.split("T");
+    if (name === "reservationDate") date = value;
+    if (name === "reservationTime") time = value + ":00";
+    const newBookingTime = `${date}T${time}`;
+    setReservation({ ...reservation, bookingTime: newBookingTime });
+  };
+
+  const handleCheckboxInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = event.target;
+    setReservation({ ...reservation, [name]: checked });
   };
 
   return (
@@ -79,15 +96,22 @@ const ReservationForm = () => {
         <input
           type="date"
           placeholder="Date"
-          value={reservation.bookingTime}
-          name="bookingTime"
-          onChange={handleInputChange}
+          value={reservation.bookingTime.split("T")[0]}
+          name="reservationDate"
+          onChange={handleDateTimeInputChange}
           className="input input-bordered input-primary w-full max-w-xs"
         />
         <div className="py-1" />
         <input
           type="time"
           placeholder="Time"
+          value={
+            reservation.bookingTime.split("T")[1] === undefined
+              ? ""
+              : reservation.bookingTime.split("T")[1]
+          }
+          name="reservationTime"
+          onChange={handleDateTimeInputChange}
           className="input input-bordered input-primary w-full max-w-xs"
         />
         <div className="py-1" />
@@ -115,17 +139,17 @@ const ReservationForm = () => {
             type="checkbox"
             checked={reservation.allowSMS}
             name="allowSMS"
-            onChange={handleInputChange}
+            onChange={handleCheckboxInputChange}
             className="checkbox"
           />
         </label>
         <label className="label cursor-pointer">
-          <span className="label-text">Allow SMS?</span>
+          <span className="label-text">Allow Marketing?</span>
           <input
             type="checkbox"
             checked={reservation.allowMarketing}
             name="allowMarketing"
-            onChange={handleInputChange}
+            onChange={handleCheckboxInputChange}
             className="checkbox"
           />
         </label>

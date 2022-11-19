@@ -13,7 +13,7 @@ const NavBar = () => {
           onClick={() => reservationStore.openForm()}
           className="btn btn-primary"
         >
-          + Reservation
+          + Add Party
         </a>
       </div>
     </div>

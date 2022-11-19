@@ -24,8 +24,6 @@ export default class ReservationStore {
     try {
       const reservations = await agent.Reservations.record();
       reservations.forEach((reservation) => {
-        // TODO: need to work on the date time issues--I need both!
-        reservation.bookingTime = reservation.bookingTime.split("T")[0];
         this.reservationRegistry.set(reservation.id, reservation);
       });
       this.setLoadingInitial(false);
