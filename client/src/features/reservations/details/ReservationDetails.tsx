@@ -1,18 +1,25 @@
-import React from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { convertTimeFormat } from "../../../app/helpers/dateTime";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useStore } from "../../../app/stores/store";
+import { useParams, Link } from "react-router-dom";
 
 const ReservationDetails = () => {
   const { reservationStore } = useStore();
   const {
     selectedReservation: reservation,
-    openForm,
-    cancelSelectReservation,
+    loadReservation,
+    loadingInitial,
   } = reservationStore;
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id) loadReservation(id);
+  }, [id, loadReservation]);
 
   // guard clause necessary to remove typescript errors even though guard clause in dashboard checks if reservation is undefined
-  if (!reservation) return <LoadingComponent />;
+  if (loadingInitial || !reservation) return <LoadingComponent />;
 
   return (
     <div className="card w-96 bg-neutral text-neutral-content">
@@ -73,19 +80,16 @@ const ReservationDetails = () => {
           />
         </label>
         <div className="card-actions justify-end">
-          <button
-            onClick={() => openForm(reservation.id)}
-            className="btn btn-primary"
-          >
+          <Link to={`/manage/${reservation.id}`} className="btn btn-primary">
             Edit
-          </button>
-          <button onClick={cancelSelectReservation} className="btn btn-ghost">
+          </Link>
+          <Link to={`/reservations`} className="btn btn-ghost">
             Cancel
-          </button>
+          </Link>
         </div>
       </div>
     </div>
   );
 };
 
-export default ReservationDetails;
+export default observer(ReservationDetails);

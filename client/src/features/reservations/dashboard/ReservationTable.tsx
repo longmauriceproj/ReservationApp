@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import React, { SyntheticEvent, useState } from "react";
 import { convertTimeFormat } from "../../../app/helpers/dateTime";
 import { useStore } from "../../../app/stores/store";
+import { Link } from "react-router-dom";
 
 const ReservationTable = () => {
   const { reservationStore } = useStore();
@@ -55,14 +56,12 @@ const ReservationTable = () => {
                 </button>
               </th>
               <th>
-                <button
-                  onClick={() =>
-                    reservationStore.selectReservation(reservation.id)
-                  }
+                <Link
+                  to={`/reservations/${reservation.id}`}
                   className="btn btn-ghost btn-xs"
                 >
                   details
-                </button>
+                </Link>
               </th>
             </tr>
           ))}

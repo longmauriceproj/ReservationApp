@@ -1,19 +1,15 @@
 import { observer } from "mobx-react-lite";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { useStore } from "../../../app/stores/store";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { v4 as uuid } from "uuid";
 
-// TODO: The form is still missing a lot of validation, but all basic CRUD operations works. 11/19/2022
+// TODO: Issue where if I first navigate to edit details of existing reservation and then try navigating to add new reservation, the form inputs stay populated with the details of the existing reservation
+// setting a key to the route does not solve this issue
 
 const ReservationForm = () => {
-  const { reservationStore } = useStore();
-  const {
-    selectedReservation,
-    closeForm,
-    createReservation,
-    updateReservation,
-    loading,
-  } = reservationStore;
-  const initialState = selectedReservation ?? {
+  const initialState = {
     id: "",
     bookingTime: "",
     partySize: 1,
@@ -24,16 +20,51 @@ const ReservationForm = () => {
     allowSMS: false,
     allowMarketing: false,
   };
+  const { reservationStore } = useStore();
+  const {
+    createReservation,
+    updateReservation,
+    loading,
+    loadingInitial,
+    loadReservation,
+  } = reservationStore;
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [reservation, setReservation] = useState(initialState);
 
-  const handleSubmit = (event: ChangeEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    reservation.id
-      ? updateReservation(reservation)
-      : createReservation(reservation);
-    console.log(reservation);
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    let ignore = false;
+
+    if (id)
+      loadReservation(id, controller.signal).then((reservation) => {
+        if (!ignore) setReservation(reservation! ?? initialState);
+      });
+    else setReservation(initialState);
+
+    return () => {
+      controller.abort();
+      ignore = true;
+    };
+  }, [id, loadReservation]);
+
+  const handleSubmit = useCallback(
+    (event: ChangeEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (reservation.id.length) {
+        updateReservation(reservation).then(() => {
+          navigate(`/reservations/${reservation.id}`);
+        });
+      } else {
+        const newReservation = { ...reservation, id: uuid() };
+        createReservation(newReservation).then(() => {
+          navigate(`/reservations/${newReservation.id}`);
+        });
+      }
+    },
+    [reservation]
+  );
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -46,7 +77,7 @@ const ReservationForm = () => {
     const { name, value } = event.target;
     let [date, time] = reservation.bookingTime.split("T");
     if (name === "reservationDate") date = value;
-    if (name === "reservationTime") time = value + ":00";
+    if (name === "reservationTime") time = value + ":00"; //time string format HH:mm:ss expected, but the time input only returns HH:mm so concatenated ":ss" for consistency
     const newBookingTime = `${date}T${time}`;
     setReservation({ ...reservation, bookingTime: newBookingTime });
   };
@@ -55,6 +86,9 @@ const ReservationForm = () => {
     const { name, checked } = event.target;
     setReservation({ ...reservation, [name]: checked });
   };
+
+  if (loadingInitial || !reservation)
+    return <LoadingComponent content="Loading reservation..." />;
 
   return (
     <form
@@ -161,9 +195,9 @@ const ReservationForm = () => {
           >
             Submit
           </button>
-          <button onClick={closeForm} type="button" className="btn btn-ghost">
+          <Link to="/reservations" type="button" className="btn btn-ghost">
             Cancel
-          </button>
+          </Link>
         </div>
       </div>
     </form>

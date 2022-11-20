@@ -1,25 +1,24 @@
-import React, { useEffect } from "react";
-import NavBar from "./NavBar";
 import ReservationDashboard from "../../features/reservations/dashboard/ReservationDashboard";
-import LoadingComponent from "./LoadingComponent";
-import { useStore } from "../stores/store";
 import { observer } from "mobx-react-lite";
+import { Route, Routes } from "react-router-dom";
+import HomePage from "../../features/home/HomePage";
+import ReservationForm from "../../features/reservations/form/ReservationForm";
+import ReservationDetails from "../../features/reservations/details/ReservationDetails";
+import Dashboard from "./Dashboard";
 
+// TODO: inactivity log out
 function App() {
-  const { reservationStore } = useStore();
-
-  useEffect(() => {
-    reservationStore.loadReservations();
-  }, [reservationStore]);
-
-  if (reservationStore.loadingInitial)
-    return <LoadingComponent content="Loading reservations..." />;
-
   return (
-    <>
-      <NavBar />
-      <ReservationDashboard />
-    </>
+    <Routes>
+      <Route index element={<HomePage />} />
+      <Route element={<Dashboard />}>
+        <Route path="/reservations" element={<ReservationDashboard />} />
+        <Route path="/reservations/:id" element={<ReservationDetails />} />
+        {["/addReservation", "/manage/:id"].map((path) => (
+          <Route path={path} element={<ReservationForm />} key={path} />
+        ))}
+      </Route>
+    </Routes>
   );
 }
 

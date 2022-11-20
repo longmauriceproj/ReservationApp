@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
 import { Reservation } from "../models/reservation";
-import { v4 as uuid } from "uuid";
 
 export default class ReservationStore {
   reservationRegistry = new Map<string, Reservation>();
@@ -20,11 +19,12 @@ export default class ReservationStore {
     );
   }
 
-  loadReservations = async () => {
+  loadReservations = async (abortSignal?: AbortSignal) => {
+    this.setLoadingInitial(true);
     try {
-      const reservations = await agent.Reservations.record();
+      const reservations = await agent.Reservations.record(abortSignal);
       reservations.forEach((reservation) => {
-        this.reservationRegistry.set(reservation.id, reservation);
+        this.setReservation(reservation);
       });
       this.setLoadingInitial(false);
     } catch (err) {
@@ -33,30 +33,48 @@ export default class ReservationStore {
     }
   };
 
+  // TODO: Must note that getting reservation from memory only works if only one client is accessing and performing CRUD ops to the database, else info may not be up-to-date
+  loadReservation = async (id: string, abortSignal?: AbortSignal) => {
+    // checking and loading reservation from memory
+    let reservation = this.getReservation(id);
+    if (reservation) {
+      this.selectedReservation = reservation;
+      return reservation;
+    } else {
+      this.setLoadingInitial(true);
+      try {
+        reservation = await agent.Reservations.details(id, abortSignal);
+        runInAction(() => {
+          if (reservation) {
+            this.setReservation(reservation);
+            this.selectedReservation = reservation;
+            return reservation;
+          }
+          this.loadingInitial = false;
+        });
+      } catch (err) {
+        console.error(err);
+        this.setLoadingInitial(false);
+      }
+    }
+  };
+
+  private setReservation = (reservation: Reservation) => {
+    this.reservationRegistry.set(reservation.id, reservation);
+  };
+
+  // Helper method if we want to get reservation in memory
+  // TODO: It's okay to do this as long as only one account is active at any given time. Else, reservations and reservation details may not be up to date.
+  private getReservation = (id: string) => {
+    return this.reservationRegistry.get(id);
+  };
+
   setLoadingInitial = (state: boolean) => {
     this.loadingInitial = state;
   };
 
-  selectReservation = (id: string) => {
-    this.selectedReservation = this.reservationRegistry.get(id);
-  };
-
-  cancelSelectReservation = () => {
-    this.selectedReservation = undefined;
-  };
-
-  openForm = (id?: string) => {
-    id ? this.selectReservation(id) : this.cancelSelectReservation();
-    this.editMode = true;
-  };
-
-  closeForm = () => {
-    this.editMode = false;
-  };
-
   createReservation = async (reservation: Reservation) => {
     this.setLoading(true);
-    reservation.id = uuid();
     try {
       await agent.Reservations.create(reservation);
       runInAction(() => {
@@ -97,7 +115,6 @@ export default class ReservationStore {
       await agent.Reservations.delete(id);
       runInAction(() => {
         this.reservationRegistry.delete(id);
-        if (this.selectedReservation?.id === id) this.cancelSelectReservation();
         this.loading = false;
       });
     } catch (err) {

@@ -1,4 +1,5 @@
-import React from "react";
+import { observer } from "mobx-react-lite";
+import { Link } from "react-router-dom";
 import { useStore } from "../stores/store";
 
 const NavBar = () => {
@@ -6,18 +7,17 @@ const NavBar = () => {
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">
-        <a className="btn btn-ghost normal-case text-xl">demoRES</a>
+        <Link to="/reservations" className="btn btn-ghost normal-case text-xl">
+          demoRES
+        </Link>
       </div>
       <div className="navbar-end">
-        <a
-          onClick={() => reservationStore.openForm()}
-          className="btn btn-primary"
-        >
+        <Link to="/addReservation" className="btn btn-primary">
           + Add Party
-        </a>
+        </Link>
       </div>
     </div>
   );
 };
 
-export default NavBar;
+export default observer(NavBar);

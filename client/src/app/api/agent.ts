@@ -20,24 +20,34 @@ axios.interceptors.response.use(async (response) => {
   }
 });
 
-const responseBody = <T>(response: AxiosResponse<T>) => response.data;
+const responseBody = <T>(response: AxiosResponse<T>) => response?.data;
 
 const requests = {
-  get: <T>(url: string) => axios.get<T>(url).then(responseBody),
-  post: <T>(url: string, body: {}) =>
-    axios.post<T>(url, body).then(responseBody),
-  put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
-  del: <T>(url: string) => axios.delete<T>(url).then(responseBody),
+  get: <T>(url: string, abortSignal?: AbortSignal) =>
+    axios.get<T>(url, { signal: abortSignal }).then(responseBody),
+  post: <T>(url: string, body: {}, abortSignal?: AbortSignal) =>
+    axios.post<T>(url, body, { signal: abortSignal }).then(responseBody),
+  put: <T>(url: string, body: {}, abortSignal?: AbortSignal) =>
+    axios.put<T>(url, body, { signal: abortSignal }).then(responseBody),
+  del: <T>(url: string, abortSignal?: AbortSignal) =>
+    axios.delete<T>(url, { signal: abortSignal }).then(responseBody),
 };
 
 const Reservations = {
-  record: () => requests.get<Reservation[]>("/reservations"),
-  details: (id: string) => requests.get<Reservation>(`/reservations/${id}`),
-  create: (reservation: Reservation) =>
-    requests.post<void>(`/reservations`, reservation),
-  update: (reservation: Reservation) =>
-    requests.put<void>(`/reservations/${reservation.id}`, reservation),
-  delete: (id: string) => requests.del<void>(`/reservations/${id}`),
+  record: (abortSignal?: AbortSignal) =>
+    requests.get<Reservation[]>("/reservations", abortSignal),
+  details: (id: string, abortSignal?: AbortSignal) =>
+    requests.get<Reservation>(`/reservations/${id}`, abortSignal),
+  create: (reservation: Reservation, abortSignal?: AbortSignal) =>
+    requests.post<void>(`/reservations`, reservation, abortSignal),
+  update: (reservation: Reservation, abortSignal?: AbortSignal) =>
+    requests.put<void>(
+      `/reservations/${reservation.id}`,
+      reservation,
+      abortSignal
+    ),
+  delete: (id: string, abortSignal?: AbortSignal) =>
+    requests.del<void>(`/reservations/${id}`, abortSignal),
 };
 
 const agent = {
