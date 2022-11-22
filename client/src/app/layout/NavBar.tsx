@@ -10,6 +10,9 @@ const NavBar = () => {
         <Link to="/reservations" className="btn btn-ghost normal-case text-xl">
           demoRES
         </Link>
+        <Link to="/errors" className="btn btn-ghost">
+          Test Errors
+        </Link>
       </div>
       <div className="navbar-end">
         <Link to="/addReservation" className="btn btn-primary">

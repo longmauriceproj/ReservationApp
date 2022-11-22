@@ -34,6 +34,7 @@ export default class ReservationStore {
   };
 
   // TODO: Must note that getting reservation from memory only works if only one client is accessing and performing CRUD ops to the database, else info may not be up-to-date
+  // probably can't implement as is since storing in memory won't get any reservations made by visitors to restaurant site.
   loadReservation = async (id: string, abortSignal?: AbortSignal) => {
     // checking and loading reservation from memory
     let reservation = this.getReservation(id);

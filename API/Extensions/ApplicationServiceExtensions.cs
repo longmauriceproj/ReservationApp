@@ -1,5 +1,7 @@
 using API.Data;
 using API.Helper;
+using API.Validation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions
@@ -11,6 +13,7 @@ namespace API.Extensions
             services.AddDbContext<DataContext>(options => {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
+            services.AddValidatorsFromAssemblyContaining<ReservationValidator>();
             return services;
         }
     }
